@@ -1,4 +1,4 @@
-// ScriptLine.jsx
+// ScriptLine.jsx  file này là component hiển thị transcript của từng dòng nói
 import React, { useState } from "react";
 
 const ScriptLine = ({ speaker, text, isCurrent, onRename, time }) => {
