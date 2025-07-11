@@ -1,13 +1,13 @@
 import React, { useState, useRef } from "react";
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 import BoardScript from "./BoardScript";
-import { formatMilliseconds } from "../utils/time";
-import { useTimer } from "../hooks/useTimer";
+import { formatMilliseconds } from "../../utils/time";
+import { useTimer } from "../../hooks/useTimer";
 import SpeechControls from "./SpeechControls";
 
 
 
-const SpeechToText = () => {
+const SpeechToText = ({ onTranscriptProcessed }) => {
     const [status, setStatus] = useState("idle"); // "idle" | "recording" | "paused"
     const [currentText, setCurrentText] = useState("");
     const transcriberRef = useRef(null);
@@ -17,7 +17,7 @@ const SpeechToText = () => {
     console.log("hi")
     const {
         elapsedTime,
-        elapsedTimeRef, 
+        elapsedTimeRef,
         start: startTimer,
         pause: pauseTimer,
         reset: resetTimer
@@ -104,6 +104,7 @@ const SpeechToText = () => {
                 const errorMsg = e.errorDetails || "Không rõ lỗi";
                 setCurrentText(`⛔ Nhận diện bị hủy: ${errorMsg}`);
                 setStatus("idle");
+                resetTimer();
             };
 
             transcriber.startTranscribingAsync(
@@ -112,12 +113,14 @@ const SpeechToText = () => {
                     console.error("Lỗi startTranscribingAsync:", err);
                     setCurrentText("❌ Không thể bắt đầu nhận diện.");
                     setStatus("idle");
+                    resetTimer()
                 }
             );
         } catch (err) {
             console.error("Speech error:", err);
             setCurrentText("❌ Lỗi khi nhận diện.");
             setStatus("idle");
+            resetTimer();
         }
     };
 
@@ -146,6 +149,7 @@ const SpeechToText = () => {
                 err => {
                     console.error("Lỗi khi tiếp tục:", err);
                     setCurrentText("❌ Không thể tiếp tục.");
+                    resetTimer();
                 }
             );
         }
@@ -158,31 +162,56 @@ const SpeechToText = () => {
                     transcriberRef.current = null;
                     setStatus("idle");
                     setCurrentText("⏹️ Đã dừng hoàn toàn");
-
                     resetTimer();
 
-                    fetch("http://localhost:3001/api/receiveSpeech", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ transcript: transcriptRef.current })
-                    })
-                        .then(res => {
-                            if (!res.ok) throw new Error("HTTP error " + res.status);
-                            return res.json();
-                        })
-                        .then(data => {
-                            console.log("Backend response:", data);
-                            transcriptRef.current = [];
-                        })
-                        .catch(err => console.error("Gửi về backend lỗi:", err));
+                    // ❌ Không gửi về backend ở đây nữa
                 },
                 err => console.error("Lỗi khi dừng:", err)
             );
         }
     };
 
+
+    const handleSubmitTranscript = () => {
+        if (transcriptRef.current.length === 0) {
+            alert("Chưa có nội dung để gửi.");
+            return;
+        }
+
+        fetch("http://localhost:3001/api/submitTranscript", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ transcript: transcriptRef.current })
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("HTTP error " + res.status);
+                return res.json();
+            })
+            .then(data => {
+                console.log("Backend response:", data);
+                onTranscriptProcessed(data);
+
+                alert("✅ Gửi biên bản thành công!");
+                // Nếu muốn xoá transcript sau khi gửi:
+                // transcriptRef.current = [];
+            })
+            .catch(err => {
+                console.error("Gửi về backend lỗi:", err);
+                alert("❌ Gửi thất bại.");
+            });
+    };
+
+
     return (
-        <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-lg rounded-2xl text-center">
+        <div className="w-full mx-auto py-4 px-6 bg-white rounded text-center relative h-full">
+
+            {status === "idle" && transcriptRef.current.length > 0 && (
+                <button
+                    onClick={handleSubmitTranscript}
+                    className="absolute bottom-4 right-10 px-4 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded shadow"
+                >
+                    📄 Tạo biên bản
+                </button>)}
 
             <SpeechControls
                 status={status}
@@ -190,15 +219,14 @@ const SpeechToText = () => {
                 onPause={pauseRecognition}
                 onResume={resumeRecognition}
                 onStop={stopRecognition}
+                time={formatMilliseconds(elapsedTimeRef.current)}
             />
-
-
-            <h1 className="text-xl font-bold mb-4">🎙 Nhận diện giọng nói với Azure {formatMilliseconds(elapsedTimeRef.current)}</h1>
             <BoardScript
                 scripts={transcriptRef.current}
                 currentText={currentText}
                 onRenameSpeaker={updateSpeakerName}
             />
+
         </div>
     );
 };

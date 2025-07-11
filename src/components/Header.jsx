@@ -1,0 +1,37 @@
+import { Link } from "react-router-dom";
+const Header = () => {
+  return (
+    <header className="bg-white shadow-md sticky top-0 z-50 w-full h-12">
+      <div className="w-full px-20 py-2 flex justify-between items-center h-full">
+        {/* Logo */}
+        <Link to="/" className="text-2xl font-extrabold text-blue-600 hover:text-blue-700 transition">
+          LogoApp
+        </Link>
+
+        {/* Navigation Menu */}
+        <nav className="flex space-x-8 text-gray-700 font-medium">
+          <Link
+            to="/"
+            className="hover:text-blue-600 transition-colors duration-200"
+          >
+            Home
+          </Link>
+          <Link
+            to="/records"
+            className="hover:text-blue-600 transition-colors duration-200"
+          >
+            Record List
+          </Link>
+          <button
+            onClick={() => alert("Đăng xuất thành công!")}
+            className="hover:text-red-500 transition-colors duration-200"
+          >
+            Đăng Xuất
+          </button>
+        </nav>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
