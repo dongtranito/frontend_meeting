@@ -1,27 +1,28 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import SpeechToText from "./components/SpeechToText";
-import SummaryReport from './components/SummaryReport';
-import NoteViewReadOnly from './components/NoteViewReadOnly';
-import PDFViewer from './components/PDFViewer';
-import BienBanCuocHop from './components/bienBanCuocHop';
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import Header from './components/Header';
 import Home from './pages/Home/Home';
+import Login from './pages/Login/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Router className="flex flex-col h-screen">
-      <Header /> {/* Header cố định, ở tất cả page */}
+      <Header />
 
-      
+
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
+
         {/* <Route path="/auth" element={<Auth />} /> */}
         {/* <Route path="/records" element={<RecordList />} /> */}
+        <Route path="/login" element={<Login />} />
+
       </Routes>
       {/* <Footer /> Footer cũng ở tất cả page */}
     </Router>

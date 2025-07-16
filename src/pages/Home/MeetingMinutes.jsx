@@ -1,6 +1,6 @@
 import React from 'react';
 
-const MeetingMinutes = ({ data, transcript }) => {
+const MeetingMinutes = ({ data}) => {
 
   // const data = {
   //   "chu_tri": {
@@ -92,7 +92,6 @@ const MeetingMinutes = ({ data, transcript }) => {
   return (
     <div className="max-w-full  px-12 py-12 bg-white shadow-md text-[14px] leading-relaxed">
       {/* Phần đầu tiên của PDF */}
-      <p>{JSON.stringify(transcript)}</p>
       <div className="flex justify-between px-4">
         {/* Cột bên trái */}
         <div className="flex flex-col items-center px-5">
