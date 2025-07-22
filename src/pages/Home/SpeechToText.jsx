@@ -5,6 +5,7 @@ import { formatMilliseconds } from "../../utils/time";
 import { useTimer } from "../../hooks/useTimer";
 import SpeechControls from "./SpeechControls";
 import Chat from "./Chat";
+import { fetchWithAuth } from "../../utils/fetchWithAuth";
 
 const SpeechToText = ({ onTranscriptProcessed }) => {
     const [status, setStatus] = useState("idle"); // "idle" | "recording" | "paused"
@@ -60,7 +61,7 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
         startTimer();
         localStorage.removeItem("transcriptRaw");
         try {
-            const res = await fetch("http://localhost:3001/api/token",
+            const res = await fetchWithAuth("http://localhost:3001/api/token",
                 {
                     credentials: "include", 
                 }
@@ -179,13 +180,15 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
         );
     };
 
+
+    // ở hàm này thì mình có thể gắn biến trạng thái đã gởi, hoặc đã gởi xong, xong rôi rồi truyền xuống component con cũng được, mà mình lỡ làm ở component con rồi thì thôi
     const handleSubmitTranscript = (transcriptChat) => {
         if (transcript.length === 0) {
             alert("Chưa có nội dung để gửi.");
             return;
         }
 
-        fetch("http://localhost:3001/api/submitTranscript", {
+        return fetchWithAuth("http://localhost:3001/api/submitTranscript", {  // cái này là mình return về một promise, nếu muốn dễ nhìn thì viết bằng async 
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -205,8 +208,6 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
                 onTranscriptProcessed(data);
                 setBienbanData(data.bienBanData);
                 setSummaryData(data.summaryData);
-                alert("✅ Gửi biên bản thành công!");
-
                 // Cập nhật dữ liệu vào localStorage (khi nhận được sumaryData)
                 localStorage.setItem("transcriptRaw", JSON.stringify({
                     transcript,
@@ -217,7 +218,6 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
             })
             .catch((err) => {
                 console.error("Lỗi gửi:", err);
-                alert("❌ Gửi thất bại.");
             });
     };
 

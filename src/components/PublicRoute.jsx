@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { fetchWithAuth } from "../utils/fetchWithAuth";
 
-const ProtectedRoute = ({ children }) => {
+const PublicRoute = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuth, setIsAuth] = useState(false);
 
@@ -10,18 +10,15 @@ const ProtectedRoute = ({ children }) => {
     const checkAuth = async () => {
       try {
         const res = await fetchWithAuth("http://localhost:3001/profile", {
-          credentials: "include", 
+          credentials: "include",
         });
 
         if (res.ok) {
           setIsAuth(true);
-          console.log("✅ Đã đăng nhập");
         } else {
           setIsAuth(false);
-          console.log("🚫 Chưa đăng nhập");
         }
       } catch (err) {
-        console.error("❌ Lỗi kết nối khi kiểm tra login:", err);
         setIsAuth(false);
       } finally {
         setLoading(false);
@@ -31,10 +28,10 @@ const ProtectedRoute = ({ children }) => {
     checkAuth();
   }, []);
 
-  if (loading) return <div></div>;
+  if (loading) return <div ></div>;
 
-  if (!isAuth) return <Navigate to="/login" replace />;
-  return children; 
+  if (isAuth) return <Navigate to="/" replace />;
+  return children;
 };
 
-export default ProtectedRoute;
+export default PublicRoute;

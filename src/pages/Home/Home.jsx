@@ -3,6 +3,7 @@ import SpeechToText from "./SpeechToText";
 import SummaryReport from "./SummaryReport";
 import MeetingMinutes from "./MeetingMinutes";
 import Chat from "./Chat";
+import { fetchWithAuth } from "../../utils/fetchWithAuth";
 const Home = () => {
   const [activeTab, setActiveTab] = useState("summary"); // "summary" hoặc "pdf"
   const [processedTranscript, setProcessedTranscript] = useState(null);
@@ -19,7 +20,7 @@ const Home = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3001/createMeeting", {
+      const response = await fetchWithAuth("http://localhost:3001/createMeeting", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

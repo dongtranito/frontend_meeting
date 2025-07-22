@@ -1,5 +1,22 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const Header = () => {
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        navigate("/login", { replace: true });
+      } else {
+        alert("❌ Đăng xuất thất bại!");
+      }
+    } catch (error) {
+      console.error("Lỗi khi đăng xuất:", error);
+    }
+  };
   return (
     <header className="bg-white shadow-md sticky top-0 z-50 w-full h-12">
       <div className="w-full px-20 py-2 flex justify-between items-center h-full">
@@ -23,7 +40,7 @@ const Header = () => {
             Record List
           </Link>
           <button
-            onClick={() => alert("Đăng xuất thành công!")}
+            onClick={handleLogout}
             className="hover:text-red-500 transition-colors duration-200"
           >
             Đăng Xuất
