@@ -6,6 +6,7 @@ import { useTimer } from "../../hooks/useTimer";
 import SpeechControls from "./SpeechControls";
 import Chat from "./Chat";
 import { fetchWithAuth } from "../../utils/fetchWithAuth";
+import { useParams, useNavigate } from "react-router-dom";
 
 const SpeechToText = ({ onTranscriptProcessed }) => {
     const [status, setStatus] = useState("idle"); // "idle" | "recording" | "paused"
@@ -15,6 +16,11 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
     const [summaryData, setSummaryData] = useState(null);
     const [bienbanData, setBienbanData] = useState("chưa có biên bản cũ");
     const [thoiGianNop, setThoiGianNop] = useState(null);
+    const [meetingId, setMeetingId] = useState(null);
+
+    const navigate = useNavigate();
+    const { meetingID } = useParams();  // khi mà không có cái meetingID này thì ta lấy dữ liệu từ local. ngược lại thì fetch dữ liệu
+    // console.log(meetingID)
 
     const transcriberRef = useRef(null);
     const speakerMapRef = useRef({});
@@ -28,18 +34,39 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
 
     // Load transcript từ localStorage khi vào trang
     useEffect(() => {
-        const transcriptRaw = localStorage.getItem("transcriptRaw");
-        if (transcriptRaw) {
-            const parsed = JSON.parse(transcriptRaw);
-            setTranscript(parsed.transcript);
-            setThoiGianNop(parsed.thoiGianKetThuc);
-            setBienbanData(parsed.bienBanData);
-            setSummaryData(parsed.summaryData);
 
-            onTranscriptProcessed({transcriptRaw:parsed,   
-                summaryData:parsed.summaryData,
-                bienBanData:parsed.bienBanData,
-            });
+        if (meetingID) {
+            fetchWithAuth(`http://localhost:3001/getMeetingDetail/${meetingID}`, {
+                method: "GET"
+            })
+                .then(res => res.json())
+                .then(data => {
+
+                    // console.log(data)
+                    onTranscriptProcessed(data);
+                    setBienbanData(data.bienBanData);
+                    setSummaryData(data.summaryData);
+                    setMeetingId(data.meetingId);
+                    setTranscript(data.transcript);     
+                    // Cập nhật dữ liệu vào localStorage (khi nhận được sumaryData)
+                    localStorage.setItem("transcriptRaw", JSON.stringify(data));
+
+                });
+        } else {
+            const transcriptRaw = localStorage.getItem("transcriptRaw");
+            if (transcriptRaw) {
+                const parsed = JSON.parse(transcriptRaw);
+                setTranscript(parsed.transcript);
+                setThoiGianNop(parsed.thoiGianKetThuc);
+                setBienbanData(parsed.bienBanData);
+                setSummaryData(parsed.summaryData);
+                setMeetingId(parsed.meetingId || null);
+                onTranscriptProcessed({
+                    transcriptRaw: parsed,
+                    summaryData: parsed.summaryData,
+                    bienBanData: parsed.bienBanData,
+                });
+            }
         }
     }, []);
 
@@ -55,22 +82,22 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
     };
 
     const startRecognition = async () => {
+        navigate("/");
         setStatus("recording");
         setCurrentText("🎤 Đang nghe...");
         setTranscript([]);
+        setBienbanData("chưa có biên bản cũ");
+        setMeetingId(null);
+        setSummaryData(null);    // có set lại trạng thái của các biến này nhưng mà màn hình không thay đổi là tại vì không có truyền trạng thái đi, nhưng mà được cái là làm giá trị của nó thay đổi khi ta bắt đầu ghi âm lại 
         startTimer();
+
         localStorage.removeItem("transcriptRaw");
         try {
             const res = await fetchWithAuth("http://localhost:3001/api/token",
-                {
-                    credentials: "include", 
-                }
             );
             const { token, region } = await res.json();
-
             const speechConfig = sdk.SpeechConfig.fromAuthorizationToken(token, region);
             speechConfig.speechRecognitionLanguage = "vi-VN";
-
             speechConfig.setProperty(
                 sdk.PropertyId.SpeechServiceConnection_EnableSpeakerDiarization,
                 "true"
@@ -166,7 +193,7 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
         transcriberRef.current?.stopTranscribingAsync(
             () => {
                 transcriberRef.current = null;
-                const thoiGian = new Date().toLocaleString("vi-VN"); // ✅ lấy trước
+                const thoiGian = new Date().toLocaleString("vi-VN");
                 setThoiGianNop(thoiGian);
                 setStatus("idle");
                 setCurrentText("⏹️ Đã dừng hoàn toàn");
@@ -188,7 +215,7 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
             return;
         }
 
-        return fetchWithAuth("http://localhost:3001/api/submitTranscript", {  // cái này là mình return về một promise, nếu muốn dễ nhìn thì viết bằng async 
+        return fetchWithAuth("http://localhost:3001/submitTranscript", {  // cái này là mình return về một promise, nếu muốn dễ nhìn thì viết bằng async 
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -197,6 +224,7 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
                 thoiGianKetThuc: thoiGianNop,
                 bienBanData: bienbanData,
                 summaryData: summaryData,
+                meetingId: meetingId,
             }),
             credentials: "include"
         })
@@ -208,13 +236,9 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
                 onTranscriptProcessed(data);
                 setBienbanData(data.bienBanData);
                 setSummaryData(data.summaryData);
+                setMeetingId(data.meetingId);
                 // Cập nhật dữ liệu vào localStorage (khi nhận được sumaryData)
-                localStorage.setItem("transcriptRaw", JSON.stringify({
-                    transcript,
-                    thoiGianKetThuc: thoiGianNop,
-                    bienBanData: data.bienBanData,
-                    summaryData: data.summaryData,
-                }));
+                localStorage.setItem("transcriptRaw", JSON.stringify(data));
             })
             .catch((err) => {
                 console.error("Lỗi gửi:", err);

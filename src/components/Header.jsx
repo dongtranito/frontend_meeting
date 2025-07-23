@@ -1,17 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
+import { fetchWithAuth } from "../utils/fetchWithAuth";
 const Header = () => {
   const navigate = useNavigate();
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:3001/logout", {
+      const response = await fetchWithAuth("http://localhost:3001/logout", {
         method: "POST",
         credentials: "include",
       });
 
       if (response.ok) {
+        localStorage.removeItem("transcriptRaw");
         navigate("/login", { replace: true });
-      } else {
-        alert("❌ Đăng xuất thất bại!");
       }
     } catch (error) {
       console.error("Lỗi khi đăng xuất:", error);

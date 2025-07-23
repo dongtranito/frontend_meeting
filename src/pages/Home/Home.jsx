@@ -4,44 +4,16 @@ import SummaryReport from "./SummaryReport";
 import MeetingMinutes from "./MeetingMinutes";
 import Chat from "./Chat";
 import { fetchWithAuth } from "../../utils/fetchWithAuth";
+import { useParams } from "react-router-dom";
+
 const Home = () => {
   const [activeTab, setActiveTab] = useState("summary"); // "summary" hoặc "pdf"
   const [processedTranscript, setProcessedTranscript] = useState(null);
+  
 
   const handleTranscriptProcessed = (dataFromBackend) => {
-    setProcessedTranscript(dataFromBackend); // backend trả về JSON gì thì giữ ở đây
+    setProcessedTranscript(dataFromBackend); // backend trả về JSON gì thì giữ ở đây 
   };
-
-
-  const handleSaveMeeting = async () => {
-    if (!processedTranscript) {
-      alert("❌ Chưa có dữ liệu để lưu cuộc họp");
-      return;
-    }
-
-    try {
-      const response = await fetchWithAuth("http://localhost:3001/createMeeting", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          transcript: processedTranscript.transcriptRaw.transcript,
-          thoiGianKetThuc: processedTranscript.transcriptRaw.thoiGianNop,
-          bienBanData: processedTranscript.bienBanData,
-          summaryData: processedTranscript.summaryData,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Gửi không thành công");
-
-    } catch (err) {
-      console.error("Lỗi khi lưu cuộc họp:", err);
-      alert("❌ Gửi cuộc họp thất bại");
-    }
-  };
-
 
   return (
     <div className=" bg-blue-100 py-1 px-2 pt-1 h-[calc(100vh-48px)] flex gap-1 ">
@@ -55,11 +27,11 @@ const Home = () => {
 
         <div className="flex justify-between items-center px-7 py-2 bg-[#f5f6f8] border-b rounded-t-md">
           {/* Tabs bên trái */}
-          <button className="flex items-center gap-1 bg-[#7c3aed] text-white px-4 py-2 text-sm font-medium rounded-md hover:bg-[#6d28d9] transition"
+          {/* <button className="flex items-center gap-1 bg-[#7c3aed] text-white px-4 py-2 text-sm font-medium rounded-md hover:bg-[#6d28d9] transition"
             onClick={handleSaveMeeting}
           >
             Lưu cuộc họp
-          </button>
+          </button> */}
 
           <div className="flex gap-2">
             <button

@@ -7,11 +7,20 @@ import Login from './pages/Login/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import MainLayout from './layouts/MainLayout';
+import MeetingListDemo from './pages/RecordList/MeetingList';
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route path="meeting/:meetingID" element={
+          //dùng mainLayout để cho nó có header cho từng thằng trừ thằng cần đăng nhập 
+          <MainLayout>
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          </MainLayout>
+        } />
         <Route path="/" element={
           //dùng mainLayout để cho nó có header cho từng thằng trừ thằng cần đăng nhập 
           <MainLayout>
@@ -25,7 +34,7 @@ function App() {
           //dùng mainLayout để cho nó có header cho từng thằng trừ thằng cần đăng nhập 
           <MainLayout>
             <ProtectedRoute>
-              {/* <Records /> */}
+              <MeetingListDemo />
             </ProtectedRoute>
           </MainLayout>
         } />
