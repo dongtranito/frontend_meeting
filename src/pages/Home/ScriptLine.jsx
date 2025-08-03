@@ -30,7 +30,7 @@ const ScriptLine = ({ speaker, text, isCurrent, onRename, time }) => {
                         autoFocus
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
-                                e.target.blur(); // 👈 gọi blur giống như khi click ra ngoài
+                                e.target.blur(); 
                             }
                         }}
                         className="border rounded px-1 text-sm"

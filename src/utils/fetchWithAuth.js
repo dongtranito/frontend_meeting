@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_URL;
+
 export const fetchWithAuth = async (url, options = {}) => {
   let response = await fetch(url, {
     ...options,
@@ -5,7 +7,7 @@ export const fetchWithAuth = async (url, options = {}) => {
   });
 
   if (response.status === 401) {
-    const refreshResponse = await fetch("http://localhost:3001/refresh-token", {
+    const refreshResponse = await fetch(`${API_URL}/refresh-token`, {
       method: "POST",
       credentials: "include", 
     });

@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-
+const API_URL = import.meta.env.VITE_API_URL;
+console.log ("login",API_URL);
+console.log("import", import.meta.env)
 const firebaseConfig = {
     apiKey: "AIzaSyDHdcsvn-HGr2BAPWKCxLZSedIKK-3VdWs",
     authDomain: "metting-fcbcf.firebaseapp.com",
@@ -20,20 +22,19 @@ const auth = getAuth(app);
 const Login = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-
     const navigate = useNavigate();
-
     const handleLogin = async () => {
         setError("");
         setLoading(true);
 
         try {
+
             const provider = new GoogleAuthProvider();
             const result = await signInWithPopup(auth, provider);
             const user = result.user;
             const idToken = await user.getIdToken();
 
-            const res = await fetch("http://localhost:3001/login", {
+            const res = await fetch(`${API_URL}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ idToken }),

@@ -8,7 +8,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import MainLayout from './layouts/MainLayout';
 import MeetingListDemo from './pages/RecordList/MeetingList';
-
+console.log('API_URL:', import.meta.env.VITE_API_URL);
 function App() {
   return (
     <Router>

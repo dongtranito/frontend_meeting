@@ -1,10 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../utils/fetchWithAuth";
+const API_URL = import.meta.env.VITE_API_URL;
+
+console.log ("hi", API_URL)
 const Header = () => {
   const navigate = useNavigate();
   const handleLogout = async () => {
     try {
-      const response = await fetchWithAuth("http://localhost:3001/logout", {
+      const response = await fetchWithAuth(`${API_URL}/logout`, {
         method: "POST",
         credentials: "include",
       });

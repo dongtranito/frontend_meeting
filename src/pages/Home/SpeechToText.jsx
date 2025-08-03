@@ -7,6 +7,7 @@ import SpeechControls from "./SpeechControls";
 import Chat from "./Chat";
 import { fetchWithAuth } from "../../utils/fetchWithAuth";
 import { useParams, useNavigate } from "react-router-dom";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const SpeechToText = ({ onTranscriptProcessed }) => {
     const [status, setStatus] = useState("idle"); // "idle" | "recording" | "paused"
@@ -36,7 +37,7 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
     useEffect(() => {
 
         if (meetingID) {
-            fetchWithAuth(`http://localhost:3001/getMeetingDetail/${meetingID}`, {
+            fetchWithAuth(`${API_URL}/getMeetingDetail/${meetingID}`, {
                 method: "GET"
             })
                 .then(res => res.json())
@@ -93,7 +94,7 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
 
         localStorage.removeItem("transcriptRaw");
         try {
-            const res = await fetchWithAuth("http://localhost:3001/api/token",
+            const res = await fetchWithAuth(`${API_URL}/api/token`,
             );
             const { token, region } = await res.json();
             const speechConfig = sdk.SpeechConfig.fromAuthorizationToken(token, region);
@@ -215,7 +216,7 @@ const SpeechToText = ({ onTranscriptProcessed }) => {
             return;
         }
 
-        return fetchWithAuth("http://localhost:3001/submitTranscript", {  // cái này là mình return về một promise, nếu muốn dễ nhìn thì viết bằng async 
+        return fetchWithAuth(`${API_URL}/submitTranscript`, {  // cái này là mình return về một promise, nếu muốn dễ nhìn thì viết bằng async 
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

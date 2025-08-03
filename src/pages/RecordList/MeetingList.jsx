@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchWithAuth } from "../../utils/fetchWithAuth";
 import MeetingItem from "./MeetingItem";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const MeetingList = () => {
   const [meetings, setMeetings] = useState([]);
@@ -12,7 +13,7 @@ const MeetingList = () => {
   useEffect(() => {
     const fetchMeetings = async () => {
       try {
-        const response = await fetchWithAuth("http://localhost:3001/getMeetingList");
+        const response = await fetchWithAuth(`${API_URL}/getMeetingList`);
         if (!response.ok) throw new Error("Không thể lấy dữ liệu");
         const data = await response.json();
         setMeetings(data.data);
