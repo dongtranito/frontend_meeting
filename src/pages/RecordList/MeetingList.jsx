@@ -31,6 +31,22 @@ const MeetingList = () => {
     navigate(`/meeting/${id}`);
   };
 
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetchWithAuth(`${API_URL}/deleteMeeting/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        throw new Error("Xoá thất bại");
+      }
+      setMeetings((prev) => prev.filter((meeting) => meeting.id !== id));
+
+      console.log("Đã xoá meeting", id);
+    } catch (err) {
+      console.error("Lỗi khi xoá:", err);
+    }
+  };
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-4">📋 Danh sách cuộc họp</h2>
@@ -44,7 +60,7 @@ const MeetingList = () => {
       {!loading && !error && meetings.length > 0 && (
         <ul className="grid gap-4">
           {meetings.map((meeting) => (
-            <MeetingItem key={meeting.id} meeting={meeting} onViewDetail={handleViewDetail} />
+            <MeetingItem key={meeting.id} meeting={meeting} onViewDetail={handleViewDetail} onDelete={handleDelete} />
           ))}
         </ul>
       )}

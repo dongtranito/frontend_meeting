@@ -1,22 +1,27 @@
 // src/components/MeetingItem.jsx
-import { CalendarDays, Clock, Eye } from "lucide-react";
+import { CalendarDays, Clock, Eye, X } from "lucide-react";
 import { format } from "date-fns";
 
-const MeetingItem = ({ meeting, onViewDetail }) => {
+const MeetingItem = ({ meeting, onViewDetail, onDelete }) => {
     return (
-        <li className="bg-white rounded-2xl p-4 border border-gray-100 shadow hover:shadow-lg transition-all"
+        <li className="relative  bg-white rounded-2xl p-4 border border-gray-100 shadow hover:shadow-lg transition-all"
             onClick={() => onViewDetail(meeting.id)}
         >
+            <button
+                className="absolute top-2 right-2 text-gray-400 hover:text-red-500"
+                onClick={(e) => {
+                    e.stopPropagation(); // ngăn chặn sự kiện click lan xuống li
+                    onDelete(meeting.id);
+                }}
+            >
+            <X className="w-4 h-4" />
+
+            </button>
+            
             <div className="flex justify-between items-center mb-2">
                 <h3 className="text-xl font-semibold text-blue-700 truncate max-w-[75%]">
                     {meeting.title}
                 </h3>
-                {/* <button
-                    onClick={() => alert("xóa")}
-                    className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
-                >
-                    Xóa
-                </button> */}
             </div>
 
             <div className="text-sm text-gray-600 flex gap-4">
